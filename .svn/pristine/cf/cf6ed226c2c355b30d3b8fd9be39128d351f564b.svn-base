@@ -1,0 +1,30 @@
+#include "bmp.h"
+
+int main(int argc, char** argv) {
+    assert(argc > 2);
+
+    //We <3 constants
+    const char* input_filename = argv[2];
+    const char* output_filename = argv[3];
+    const int X = atoi(argv[4]);
+    const int Y = atoi(argv[5]);
+    const int W = atoi(argv[6]);
+    const int H = atoi(argv[7]);
+   
+    BMP_t image;
+
+    load_bmp(&image, input_filename);
+
+    BMP_t result = crop(&image, X, Y, W, H);
+
+    rotate(&result);
+
+    save_bmp(&result, output_filename);
+
+    for (int i = 0; i < result.DIB.height; i++) {
+        free(result.data[i]);
+    }
+    free(result.data);
+
+    return 0;
+}

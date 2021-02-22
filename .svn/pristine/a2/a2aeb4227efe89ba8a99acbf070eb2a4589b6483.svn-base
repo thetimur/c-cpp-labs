@@ -1,0 +1,118 @@
+#include "bmp.h"
+
+
+int get_padding_size(int val) {
+    return (4 - ((val * 3) % 4)) % 4;
+}
+
+int make_array(Color_t ***data, int W, int H) {
+    (*data) = (Color_t**)malloc(H * sizeof(Color_t*) + H * W * sizeof(Color_t));
+    
+    if (*data == NULL) {
+        return -1;
+    }
+
+    (*data)[0] = (Color_t*)(*data + H);
+
+    for(int i = 1; i < H; i++) {
+        (*data)[i] = (*data)[i - 1] + W;
+    }
+
+    return 0;
+}
+
+int load_bmp(FILE* in, BMP_t *image) {
+
+    fread(&(image->header), sizeof(Header_t), 1, in);
+    fread(&(image->DIB), sizeof(DIB_Header_t), 1, in);
+    const int PADDING_SIZE = get_padding_size(image->DIB.width);
+    char* padding = malloc(PADDING_SIZE * sizeof(char));
+
+    if (make_array(&(image->data), image->DIB.height, image->DIB.width)) {
+        free(padding);
+        return -1;
+    }
+
+    for (int i = image->DIB.height - 1; i >= 0; i--) {
+        fread(image->data[i], sizeof(Color_t), image->DIB.width, in);
+        fread(padding, 1, PADDING_SIZE, in);
+    }
+
+    free(padding);
+	return fclose(in);
+}
+
+
+int save_bmp(FILE* out, BMP_t *image) {
+    Header_t header = image->header;
+    DIB_Header_t DIB = image->DIB;
+    const int PADDING_SIZE = get_padding_size(DIB.width);
+    char *padding = calloc(PADDING_SIZE, sizeof(char));
+
+	fwrite(&header, sizeof(Header_t), 1, out);
+    fwrite(&DIB, sizeof(DIB_Header_t), 1, out);
+
+    for (int i = image->DIB.height - 1; i >= 0; i--) {
+        fwrite(image->data[i], sizeof(Color_t), image->DIB.width, out);
+        fwrite(&(padding), 1, PADDING_SIZE, out);
+    }
+
+
+    free(padding);
+    return fclose(out);
+}
+
+BMP_t rotate(BMP_t *image, int *status) {
+
+	BMP_t result;
+    result.header = image->header;
+    result.DIB = image->DIB;
+    result.DIB.width = image->DIB.height;
+    result.DIB.height = image->DIB.width;
+    result.DIB.image_size = result.DIB.height * result.DIB.width * sizeof(Color_t) 
+                    + result.DIB.height * get_padding_size(result.DIB.width);
+    result.header.file_size = sizeof(Header_t) + sizeof(DIB_Header_t) 
+                    + result.DIB.image_size;    
+
+    if (make_array(&(result.data), result.DIB.width, result.DIB.height)) {
+        *status = -1;
+        return result;
+    }
+
+    for(int i = 0 ; i < result.DIB.height; i++) {
+        for(int j = 0; j < result.DIB.width; j++) {
+            result.data[i][j] = image->data[result.DIB.width - j - 1][i];
+        }
+    }
+
+    free(image->data);
+
+    return result;
+}
+
+BMP_t crop(BMP_t *image, int * status, int x, int y, int w, int h) {
+	BMP_t result;
+	result.header = image->header;
+	result.DIB = image->DIB;
+
+	result.DIB.width = w;
+	result.DIB.height = h;
+    result.DIB.image_size = result.DIB.height * result.DIB.width * sizeof(Color_t) 
+                    + result.DIB.height * get_padding_size(result.DIB.width);
+    result.header.file_size = sizeof(Header_t) + sizeof(DIB_Header_t) 
+                    + result.DIB.image_size;
+
+	if (make_array(&(result.data), w, h)) {
+        *status = -1;
+        return result;
+    }
+	for (int i = 0; i < h; i++) {
+		for (int j = 0; j < w; j++) {
+			result.data[i][j] = (image->data)[y + i][x + j];
+		}
+	}
+
+    free(image->data);
+
+	return result;
+}

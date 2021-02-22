@@ -1,0 +1,10 @@
+#include "stddef.h"
+#include "stdio.h"
+#include "stdlib.h"
+
+int mergesort(void *array, size_t elements, size_t element_size, int (*comparator)(const void*, const void*));
+int merge(void *array, size_t elements, size_t element_size, int (*comparator)(const void*, const void*));
+void swap(char* start, char* end, size_t element_size);
+int int_lt_comparator(const void *a, const void *b);
+int char_lt_comparator(const void *a, const void *b);
+int str_lt_comparator(const void *a, const void *b);

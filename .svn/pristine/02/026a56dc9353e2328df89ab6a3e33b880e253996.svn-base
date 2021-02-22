@@ -1,0 +1,113 @@
+#include "bmp.h"
+
+
+void load_bmp(BMP_t *image, const char* input_source) {
+	FILE* in = fopen(input_source, "rb");
+
+    char padding = '0';
+
+    fread(&(image->header), sizeof(Header_t), 1, in);
+    printf("HI!\n");
+    fread(&(image->DIB), sizeof(DIB_Header_t), 1, in);
+    fseek(in, image->header.file_offset, SEEK_SET);
+    const int PADDING_SIZE = (4 - (image->DIB.width * 3 % 4)) % 4;
+
+
+    image->data = (Color_t**)malloc(image->DIB.height * sizeof(Color_t*));
+
+    for (int i = 0; i < image->DIB.height; i++) {
+        image->data[i] = (Color_t*)malloc(image->DIB.width * sizeof(Color_t));
+    }
+
+    for (int i = 0; i < image->DIB.height; i++) {
+        for (int j = 0; j < image->DIB.width; j++) {
+            fread(&(image->data[i][j]), sizeof(Color_t), 1, in);
+        }
+        fread(&(padding), 1, PADDING_SIZE, in);
+    }
+
+	fclose(in);
+}
+
+
+void save_bmp(BMP_t *image, const char* output_source) {
+	FILE* out = fopen(output_source, "wb");
+
+    char padding = '0';
+    Header_t header = image->header;
+    DIB_Header_t DIB = image->DIB;
+    Color_t **data = image->data;
+    const int PADDING_SIZE = (4 - (DIB.width * 3 % 4)) % 4;
+
+	fwrite(&header, sizeof(Header_t), 1, out);
+    fwrite(&DIB, sizeof(DIB_Header_t), 1, out);
+    fseek(out, header.file_offset, SEEK_SET);
+
+    for (int i = 0; i < DIB.height; i++) {
+        for (int j = 0; j < DIB.width; j++) {
+            fwrite(&data[i][j], sizeof(Color_t), 1, out);
+        }
+        fwrite(&padding, 1, PADDING_SIZE, out);
+    }
+
+    fclose(out);
+}
+
+void rotate(BMP_t *image) {
+	int H = (image->DIB).width;
+	int W = (image->DIB).height;
+
+	Color_t **data = (Color_t**)malloc(H * sizeof(Color_t*));
+
+    for (int i = 0; i < H; i++) {
+        data[i] = (Color_t*)malloc(W * sizeof(Color_t));
+    }	
+
+	for (int i = 0; i < H; i++) {
+		for (int j = 0; j < W; j++) {
+			data[i][j] = image->data[j][H-i-1];
+		}
+	}
+	(image->DIB).width = W;
+	(image->DIB).height = H;
+	
+    for (int i = 0; i < H; i++) {
+        for (int j = 0; j < W; j++) {
+            image->data[i][j] = data[i][j];
+        }
+    }
+
+    for (int i = 0; i < H; i++) {
+        free(data[i]);
+    }   
+    free(data);
+}
+
+BMP_t crop(BMP_t *image, int x, int y, int w, int h) {
+	BMP_t result;
+	result.header = image->header;
+	result.DIB = image->DIB;
+
+	result.DIB.width = w;
+	result.DIB.height = h;
+
+	result.data = (Color_t**)malloc(h * sizeof(Color_t*));
+
+    for (int i = 0; i < h; i++) {
+        result.data[i] = (Color_t*)malloc(w * sizeof(Color_t));
+    }	
+
+
+	for (int i = h - 1; i >= 0; i--) {
+		for (int j = 0; j < w; j++) {
+			result.data[i][j] = (image->data)[x + i][y + j];
+		}
+	}
+
+    for (int i = 0; i < image->DIB.height; i++) {
+        free(image->data[i]);
+    }
+    free(image->data);
+
+	return result;
+}

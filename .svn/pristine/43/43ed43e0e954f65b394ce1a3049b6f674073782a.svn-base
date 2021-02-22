@@ -1,0 +1,72 @@
+#include "mergesort.h"
+
+void mergesort(void *array, size_t elements, size_t element_size, int (*comparator)(const void*, const void*)) {
+    if (elements <= 1) {
+        return;
+    } 
+    char* left = array;
+    char* right = array + element_size * (elements / 2);
+
+    mergesort(left, (elements + 1) / 2, element_size, comparator);
+    mergesort(right, elements / 2, element_size, comparator);
+    merge(array, elements, element_size, comparator);
+}
+
+void merge(void *array, size_t elements, size_t element_size, int (*comparator)(const void*, const void*)) {
+    char* buffer = (char*)malloc(elements * element_size);
+    char* p = array;
+    int left = 0, right = 0, mid = (elements + 1) / 2;
+
+    while (left < mid && mid + right < elements) {
+        if (comparator(p + left * element_size, p + (mid + right) * element_size) <= 0) {
+            swap(buffer + (left + right) * element_size, p + left * element_size, element_size);
+            left++;
+        } else {
+            swap(buffer + (left + right) * element_size, p + (mid + right) * element_size, element_size);
+            right++;
+        }
+    }
+      
+    while (left < mid) {
+        swap(buffer + (left + right) * element_size, p + left * element_size, element_size);
+        left++;
+    }
+  
+    while (mid + right < elements) {
+        swap(buffer + (left + right) * element_size, p + (mid + right) * element_size, element_size);    
+        right++;
+    }
+
+    for (int i = 0; i < elements; i++) {
+        swap(buffer + i * element_size, p + i * element_size, element_size);
+    }
+    free(buffer);
+}
+
+void swap(char* start, char* end, size_t element_size) {
+    for (int i = 0; i < element_size; i++) {
+        char tmp = *(start + i);
+        *(start + i) = *(end + i);
+        *(end + i) = tmp;
+    }
+}
+
+int int_lt_comparator(const void *a, const void *b) {
+    return *(int*)a - *(int*)b;
+}
+
+int char_lt_comparator(const void *a, const void *b) {
+    return *(char*)a - *(char*)b;
+}
+
+int str_lt_comparator(const void *a, const void *b) {
+
+    const char *p1 = *(char**)a;
+    const char *p2 = *(char**)b;
+
+    while (*p1 && *p1 == *p2) {
+        p1++, p2++;
+    }
+
+    return (*p1 > *p2) - (*p2 > *p1);
+}

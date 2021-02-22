@@ -1,0 +1,42 @@
+#include "mergesort.h"
+
+int main(int argc, char const *argv[]) {
+    const char* type = argv[1];
+    int elements = argc - 2;
+
+    if (type[0] == 'i') {
+        int *data = malloc(elements * sizeof(int));
+        for (int i = 0; i < elements; i++) {
+            *(data + i) = atoi(argv[i + 2]);
+        }
+
+        mergesort(data, elements, sizeof(data[0]), int_lt_comparator);
+        for (int i = 0; i < elements; i++) {
+            printf("%d ", data[i]);
+        }
+        free(data);
+    } else if (type[0] == 'c') {
+        char *data = malloc(elements * sizeof(char));
+        for (int i = 0; i < elements; i++) {
+            *(data + i) = *argv[i + 2];
+        }
+
+        mergesort(data, elements, sizeof(data[0]), char_lt_comparator);
+        for (int i = 0; i < elements; i++) {
+            printf("%c ", data[i]);
+        }
+        free(data);
+    } else {
+        char **data = malloc(elements * sizeof(char*));
+
+        for (int i = 0; i < elements; i++) {
+            data[i] = (char*)argv[i + 2];
+        }
+
+        mergesort(data, elements, sizeof(data[0]), str_lt_comparator);
+        for (int i = 0; i < elements; i++) {
+            printf("%s\n", data[i]);
+        }
+        free(data);
+    }
+}
