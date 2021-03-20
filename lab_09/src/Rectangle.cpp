@@ -8,7 +8,7 @@ void Rectangle::print() const {
 }
 
 bool Rectangle::is_inside(int _x, int _y) const {
-	return x <= _x && _x <= x + width && y <= _y && _y <= y + height;
+	return 2 * abs(x - _x) <= width && 2 * abs(x - _x) <= height;
 }
 
 void Rectangle::zoom(int zoom_power) {

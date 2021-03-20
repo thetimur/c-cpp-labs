@@ -28,6 +28,8 @@ void init_cmd(Cmd *cmd, char *buff) {
 int main(int argc, char **argv) {
   char buff[30];
   MyVector v;
+
+  MyVector u(v);
   Cmd cmd;
 
 #define CMD_ARGS_CHECK(CMD_NAME, ARGS_NM)                 \

@@ -9,7 +9,6 @@ class MyVector {
 public: // methods
 	MyVector();
 	MyVector(std::size_t init_capacity);
-	MyVector(MyVector &from);
 	~MyVector();
 	
 
@@ -29,6 +28,8 @@ public: // methods
 private: // fields
 	std::size_t _sz, _cp;
   	int *_data;
+  	void init(MyVector &from);
+    MyVector(MyVector &from);
 };
 
 #endif

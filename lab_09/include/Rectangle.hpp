@@ -1,6 +1,7 @@
 #include "Figure.hpp"
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstddef>
 
 class Rectangle : public Figure {

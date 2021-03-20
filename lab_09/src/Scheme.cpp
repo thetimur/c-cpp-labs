@@ -10,7 +10,7 @@ Scheme::~Scheme() {
         delete figures_[i];
         figures_[i] = nullptr;
     }
-    delete figures_;
+    delete [] figures_;
     figures_ = nullptr;
 }
 
@@ -19,7 +19,7 @@ void Scheme::push_back_figure(Figure* fg) {
     size++;
 }
 
-int Scheme::find_by_id(int id) {
+int Scheme::find_by_id(int id) const {
     for (std::size_t i = 0; i < size; i++) {
         if (figures_[i]->get_id() == id) {
             return i;
@@ -38,7 +38,7 @@ void Scheme::remove_figure(int id) {
     figures_[size] = nullptr;
 }
 
-void Scheme::print_all_figures() {
+void Scheme::print_all_figures() const {
     for (std::size_t i = 0; i < size; i++) {
         figures_[i]->print();
     }
@@ -50,7 +50,7 @@ void Scheme::zoom_figure(int id, int zoom_power) {
     figures_[index]->zoom(zoom_power);
 }
 
-Figure* Scheme::is_inside_figure(int x, int y) {
+Figure* Scheme::is_inside_figure(int x, int y) const {
     for (std::size_t i = 0; i < size; i++) {
         if (figures_[i]->is_inside(x, y)) {
             return figures_[i];

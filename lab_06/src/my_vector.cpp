@@ -2,11 +2,7 @@
 #include <cstdlib>
 #include <cassert>
 
-MyVector::MyVector() {
-	_sz = 0;
-	_cp = 0;
-	_data = nullptr;
-}
+MyVector::MyVector() : MyVector(2) { }
 
 MyVector::MyVector(std::size_t init_capacity) {
 	_cp = init_capacity;
@@ -14,7 +10,7 @@ MyVector::MyVector(std::size_t init_capacity) {
 	_data = (int*)malloc(sizeof(int) * _cp);
 }
 
-MyVector::MyVector(MyVector &from) {
+void MyVector::init(MyVector &from) {
 	_cp = from._sz;
 	_sz = from._cp;
 	_data = (int*)malloc(sizeof(int) * _cp);
@@ -23,14 +19,13 @@ MyVector::MyVector(MyVector &from) {
 	}
 }
 
+MyVector::MyVector(MyVector &from) {
+	init(from);
+}
+
 void MyVector::operator=(MyVector &from) {
 	free(_data);
-	_cp = from._sz;
-	_sz = from._cp;
-	_data = (int*)malloc(sizeof(int) * _cp);
-	for (int i = 0; i < _sz; i++) {
-		_data[i] = from._data[i];
-	}
+	init(from);
 }
 
 MyVector::~MyVector() {
@@ -71,7 +66,7 @@ void MyVector::resize(std::size_t new_size) {
 		reserve(new_size);
 	}
 	if (_sz < new_size) {
-		memset(_data + _sz, 0, sizeof(int) * new_size - _sz);
+		memset(_data + _sz, 0, sizeof(int) * (new_size - _sz));
 	}
 	_sz = new_size;
 }

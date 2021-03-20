@@ -13,7 +13,7 @@ int main() {
     scheme.push_back_figure(new Rectangle(1, 5, 5, 10, 10));
     printf("Add rect!\n");
     scheme.push_back_figure(new Circle(2, 3, 3, 3, "very nice circle"));
-    scheme.push_back_figure(new Circle(2, 3, 3, 3, "very nice circle1"));
+    scheme.push_back_figure(new Circle(4, 3, 3, 3, "very nice circle1"));
 
 
     printf("Add circ!\n");
